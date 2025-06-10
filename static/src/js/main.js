@@ -1,0 +1,1 @@
+// JavaScript principal para el módulo pagos_en_facturas

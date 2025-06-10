@@ -1,0 +1,23 @@
+<odoo>
+    <data>
+        <record id="view_invoice_form_inherit_pago_inmediato" model="ir.ui.view">
+            <field name="name">account.move.form.inherit.pago.inmediato</field>
+            <field name="model">account.move</field>
+            <field name="inherit_id" ref="account.view_move_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//group[@id='header_left_group']" position="inside">
+		  <group name="div_pago_inmediato" colspan="2"
+			 invisible="invoice_payment_term_id != 1"
+			 style="background-color: #FFEBEE; border-radius: 5px;">
+		    <field name="x_efectivo" string="Monto en efectivo: "/>
+		    <field name="x_imp_mp" string="Monto en M.P." />
+		    <field name="x_nro_mp" string="Nro operacion en M.P." />
+		    <field name="x_imp_tarj" string="Monto en Tarjeta:" />
+		    <field name="x_nro_tarj" string="Nro de cupón: " />
+		    <field name="x_neto" string="Monto neto a pagar: " readonly="1" />
+                  </group> 
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>
