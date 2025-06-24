@@ -118,7 +118,10 @@ class AccountMove(models.Model):
                 # Valido Carga
                 groups_payment.post()
 
-
+            else:
+                # posteo la factura si no está posteada y evito bucle.
+                if record.state != 'posted':  
+                    res_pos = super().action_post()
     
              ## {'lang': 'es_419', 'tz': 'Europe/Brussels', 'uid': 2, 'allowed_company_ids': [1], 'active_model': 'sale.advance.payment.inv', 'active_id': 5, 'active_ids': [5], 'default_move_type': 'out_invoice', 'default_partner_id': 1115, 'default_partner_shipping_id': 1115, 'default_invoice_payment_term_id': 1, 'default_invoice_origin': 'S00024', 'validate_analytic': True}
   
