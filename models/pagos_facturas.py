@@ -27,6 +27,12 @@ class AccountMove(models.Model):
 
     def action_post(self):
         for record in self:
+            # Verificamos el monto total de la factura y evaluamos si hay que identificar el C.F.A.
+            vat = self.env['res.partner'].browse(record.partner_id.id).vat
+            
+            if record.amount_total >= self.env.company.x_tope_cf and not vat :
+                raise ValidationError("Este comprobante supera el importe establecido para no identificar al Consumidor Final. Por favor cree el contacto identificandolo completamente con su nro de cuil cuit o dni. O modifique el tope establecido en la compañía.")
+            
             # Solo realizamos la validación si el div de pagos debería ser visible
             if record.invoice_payment_term_id.id == 1:
                 if record.x_neto != 0:
@@ -54,9 +60,9 @@ class AccountMove(models.Model):
                     ('type', '=', 'cash'),
                     ('operating_unit_id', '=', res_user.default_operating_unit_id.id)
                 ], limit=1)                
-
+                raise ValidationError(f"Tipo {type} y la unidad operativos {operating_unit_id}")
                 if not journal_efectivo:
-                    raise ValidationError("No se encontró un diario de Efectivo para esta unidad operativa.")
+                    raise ValidationError("No se encontró un diario de Efectivo para esta unidad operativa, o el código está mal escrito el mismo tiene que ser cash")
                 # Crear el pago si hay efectivo
                 if record.x_efectivo > 0 and journal_efectivo:
                     self.env['account.payment'].create({

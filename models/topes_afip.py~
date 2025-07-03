@@ -1,0 +1,8 @@
+from odoo import models, fields, api
+from odoo.exceptions import ValidationError
+
+class TopeConsFinal(models.Model):
+    _inherit = 'res.company'
+    _description = 'Agregar agregar el campo para establecer el tope de consumidor final'
+
+    x_tope_cf = fields.Float(String="Tope Consumidor Final")

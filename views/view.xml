@@ -19,5 +19,19 @@
                 </xpath>
             </field>
         </record>
+	<record id="view_company_form_inherit_topecf" model="ir.ui.view">
+	  <field name="name">res.company.form.inherit.topecf</field>
+	  <field name="model">res.company</field>
+	  <field name="inherit_id" ref="base.view_company_form"/>
+	  <field name="arch" type="xml">
+
+	    <!-- Inserta x_tope_cf justo después de VAT -->
+	    <xpath expr="//notebook/page[@name='general_info']//field[@name='vat']"
+		   position="after">
+              <field name="x_tope_cf" string="Imp Max. Cons Fin Anónimo"/>
+	    </xpath>
+
+	  </field>
+	</record>
     </data>
 </odoo>
