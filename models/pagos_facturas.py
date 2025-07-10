@@ -60,7 +60,7 @@ class AccountMove(models.Model):
                     ('type', '=', 'cash'),
                     ('operating_unit_id', '=', res_user.default_operating_unit_id.id)
                 ], limit=1)                
-                raise ValidationError(f"Tipo {type} y la unidad operativos {operating_unit_id}")
+                #raise ValidationError(f"La unidad operativos {res_user.default_operating_unit_id.id} ")
                 if not journal_efectivo:
                     raise ValidationError("No se encontró un diario de Efectivo para esta unidad operativa, o el código está mal escrito el mismo tiene que ser cash")
                 # Crear el pago si hay efectivo
@@ -84,8 +84,7 @@ class AccountMove(models.Model):
 
                 if not journal_mp:
                     raise ValidationError("No se encontró un diario de Mercado Pago. \n Si está creado cambiar el código por MP ")
-
-                                
+                
                 # Crear el pago de Mercado Pago
                 if record.x_imp_mp > 0:
                     self.env['account.payment'].create({
@@ -98,7 +97,6 @@ class AccountMove(models.Model):
                         'payment_group_id': groups_payment.id,
                         'ref': f"Nro Transf: {record.x_nro_mp or 'Sin número'}",
                     })
-
 
                 # Buscar el diario con code 'Tarjetas' y la unidad operativa correspondiente
                 journal_tar = self.env['account.journal'].search([('type','=','bank'),
@@ -121,13 +119,13 @@ class AccountMove(models.Model):
                         'payment_group_id': groups_payment.id,
                         'ref': f"Nro Transf: {record.x_nro_tarj or 'Sin número'}",
                     })
-                # Valido Carga
+                # Valido el payment group
                 groups_payment.post()
 
             else:
                 # posteo la factura si no está posteada y evito bucle.
                 if record.state != 'posted':  
                     res_pos = super().action_post()
-    
+
              ## {'lang': 'es_419', 'tz': 'Europe/Brussels', 'uid': 2, 'allowed_company_ids': [1], 'active_model': 'sale.advance.payment.inv', 'active_id': 5, 'active_ids': [5], 'default_move_type': 'out_invoice', 'default_partner_id': 1115, 'default_partner_shipping_id': 1115, 'default_invoice_payment_term_id': 1, 'default_invoice_origin': 'S00024', 'validate_analytic': True}
   
