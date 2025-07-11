@@ -28,10 +28,9 @@ class AccountMove(models.Model):
     def action_post(self):
         for record in self:
             # Verificamos el monto total de la factura y evaluamos si hay que identificar el C.F.A.
-            vat = self.env['res.partner'].browse(record.partner_id.id).vat
-            
-            if record.amount_total >= self.env.company.x_tope_cf and not vat :
-                raise ValidationError("Este comprobante supera el importe establecido para no identificar al Consumidor Final. Por favor cree el contacto identificandolo completamente con su nro de cuil cuit o dni. O modifique el tope establecido en la compañía.")
+            #vat = self.env['res.partner'].browse(record.partner_id.id).vat
+            #if record.amount_total >= self.env.company.x_tope_cf and not vat :
+            #    raise ValidationError("Este comprobante supera el importe establecido para no identificar al Consumidor Final. Por favor cree el contacto identificandolo completamente con su nro de cuil cuit o dni. O modifique el tope establecido en la compañía.")
             
             # Solo realizamos la validación si el div de pagos debería ser visible
             if record.invoice_payment_term_id.id == 1:
@@ -132,12 +131,3 @@ class AccountMove(models.Model):
             
              ## {'lang': 'es_419', 'tz': 'Europe/Brussels', 'uid': 2, 'allowed_company_ids': [1], 'active_model': 'sale.advance.payment.inv', 'active_id': 5, 'active_ids': [5], 'default_move_type': 'out_invoice', 'default_partner_id': 1115, 'default_partner_shipping_id': 1115, 'default_invoice_payment_term_id': 1, 'default_invoice_origin': 'S00024', 'validate_analytic': True}
   
-class TopeConsFinal(models.Model):
-    _inherit = 'res.company'
-    _description = 'Agregar agregar el campo para establecer el tope de consumidor final'
-
-    x_tope_cf = fields.Float(string="Tope Consumidor Final",help=(
-            "Importe máximo que puede facturarse a un Consumidor Final anónimo. "
-            "Si la operación supera este monto, el sistema solicitará identificar "
-            "al comprador (CUIT/CUIL/DNI) conforme RG 5700/2025."
-        ),)
