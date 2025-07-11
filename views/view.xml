@@ -28,7 +28,7 @@
 	    <!-- Inserta x_tope_cf justo después de VAT -->
 	    <xpath expr="//notebook/page[@name='general_info']//field[@name='vat']"
 		   position="after">
-              <field name="x_tope_cf" string="Imp Max. Cons Fin Anónimo"/>
+              <!--<field name="x_tope_cf" string="Imp Max. Cons Fin Anónimo"/>-->
 	    </xpath>
 
 	  </field>
