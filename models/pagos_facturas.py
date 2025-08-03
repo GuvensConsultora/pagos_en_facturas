@@ -77,7 +77,7 @@ class AccountMove(models.Model):
                 
                 # Buscar el diario con code 'mp' y la unidad operativa correspondiente
                 journal_mp = self.env['account.journal'].search([('type','=','bank'),
-                    ('code', 'ilike', 'MP'),
+                    ('code', 'ilike', '%MP%'),
                     ('operating_unit_id', '=', record.operating_unit_id.id)
                 ], limit=1)
 
@@ -99,7 +99,7 @@ class AccountMove(models.Model):
 
                 # Buscar el diario con code 'Tarjetas' y la unidad operativa correspondiente
                 journal_tar = self.env['account.journal'].search([('type','=','bank'),
-                    ('code', 'ilike', 'TAR'),
+                    ('code', 'ilike', '%TAR%'),
                     ('operating_unit_id', '=', record.operating_unit_id.id)
                 ], limit=1)
 
