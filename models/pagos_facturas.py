@@ -18,6 +18,17 @@ class AccountMove(models.Model):
                           digits = 'Product Price', # Definimos precisión.
                           tracking = True, # Seguir los cambios en el historial.
 )
+
+
+    @api.constrains('x_imp_mp', 'x_nro_mp', 'x_imp_tarj', 'x_nro_tarj')
+    def _check_datos_pago(self):
+        for record in self:
+            if record.x_imp_mp > 0 and not record.x_nro_mp:
+                raise ValidationError("Debe ingresar el número de transacción de Mercado Pago.")
+            if record.x_imp_tarj > 0 and not record.x_nro_tarj:
+                raise ValidationError("Debe ingresar el número de cupón de la Tarjeta.")
+
+    
     # Realizamos el cálculo cuando se actuacilza x_efectivo, x_imp_mp, x_imp_tarj, amount_total, adedudao.
     @api.depends('amount_total', 'x_efectivo', 'x_imp_mp','x_imp_tarj')
     def _compute_neto(self):
