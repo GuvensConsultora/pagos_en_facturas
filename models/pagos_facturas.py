@@ -11,13 +11,20 @@ class AccountMove(models.Model):
     x_nro_mp = fields.Char(String="Nro. Transacción M.P.")
     x_imp_tarj = fields.Float(String="Importe Tarjeta.")
     x_nro_tarj = fields.Char(String="Nro cupón Tarjeta")
+    x_saldo_favor = fields.FLoat(String="Saldo a Favor",
+                                 compute="_saldo_favor", # Revisión de recibos con saldo a favor del cliente.
+                                 store=True, # Alamaceno el valor en la base de datos.
+                                 readonly = True, # Solo lectura. 
+                                 digits = 'Product Price', # Deinimos la precisión ... seguramente hay otros modelos.
+                                 tracking = True, # Sigo las pistas en el chater.
+                                )
     x_neto = fields.Float(String="Neto a Cancelar",
                           compute='_compute_neto',  #Llamo al metodo de cálculo.
                           store =True, # Almaceno el valor en la base de datos.
                           readonly = True,
                           digits = 'Product Price', # Definimos precisión.
                           tracking = True, # Seguir los cambios en el historial.
-)
+                        )
 
 
     @api.constrains('x_imp_mp', 'x_nro_mp', 'x_imp_tarj', 'x_nro_tarj')
