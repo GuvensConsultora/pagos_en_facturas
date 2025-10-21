@@ -12,7 +12,6 @@ class AccountMove(models.Model):
     x_imp_tarj = fields.Float(String="Importe Tarjeta.")
     x_nro_tarj = fields.Char(String="Nro cupón Tarjeta")
     x_saldo_favor = fields.Float(String="Saldo a Favor",
-                                 compute="_saldo_favor", # Revisión de recibos con saldo a favor del cliente.
                                  store=True, # Alamaceno el valor en la base de datos.
                                  readonly = True, # Solo lectura. 
                                  digits = 'Product Price', # Deinimos la precisión ... seguramente hay otros modelos.
@@ -37,12 +36,66 @@ class AccountMove(models.Model):
 
     
     # Realizamos el cálculo cuando se actuacilza x_efectivo, x_imp_mp, x_imp_tarj, amount_total, adedudao.
+
     @api.depends('amount_total', 'x_efectivo', 'x_imp_mp','x_imp_tarj')
     def _compute_neto(self):
         for rec in self:
             rec.x_neto = rec.amount_total - rec.x_efectivo - rec.x_imp_mp - rec.x_imp_tarj
+###################################################
+    # Revisamos los valores residuales de los pagos para determinar saldo a favor
+    def _is_immediate_payment_term(self):
+        self.ensure_one()
+        pt = self.payment_term_id
+        if not pt:
+            return True
+        l = pt.line_ids
+        return len(l) == 1 and not (l.days or l.months or l.days_after)
 
+    def _ou_credit_available(self):
+        """Suma créditos (líneas a cobrar negativas y no conciliadas) en misma OU."""
+        self.ensure_one()
+        domain = [
+            ('partner_id', '=', self.partner_id.id),
+            ('account_id.internal_type', '=', 'receivable'),
+            ('reconciled', '=', False),
+            ('balance', '<', 0),                 # crédito
+            ('move_id.state', '=', 'posted'),
+        ]
+        # (supuesto) OCA operating_unit instalado
+        if 'operating_unit_id' in self._fields and self.operating_unit_id:
+            domain.append(('operating_unit_id', '=', self.operating_unit_id.id))
+        lines = self.env['account.move.line'].search(domain)
+        # balance es negativo → crédito positivo
+        return sum(-l.balance for l in lines)
 
+    def _recalc_x_saldo_favor(self):
+        for inv in self.filtered(lambda m: m.move_type == 'out_invoice'):
+            if inv._is_immediate_payment_term():
+                credito = inv._ou_credit_available()
+                inv.x_saldo_favor = min(credito, inv.amount_total or 0.0)
+            else:
+                inv.x_saldo_favor = 0.0
+
+    @api.model
+    def create(self, vals):
+        moves = super().create(vals)   # admite dict o lista
+        moves._recalc_x_saldo_favor()  # ← “en el momento” de crear
+        return moves
+
+    def write(self, vals):
+        res = super().write(vals)
+        # Recalcular si cambian partner/OU/pt/total
+        watched = {'partner_id', 'operating_unit_id', 'payment_term_id', 'invoice_line_ids'}
+        if watched & set(vals.keys()):
+            self._recalc_x_saldo_favor()
+        return res
+
+    @api.onchange('partner_id', 'operating_unit_id', 'payment_term_id', 'invoice_line_ids')
+    def _onchange_recalc_saldo(self):
+        # feedback inmediato en UI (draft)
+        self._recalc_x_saldo_favor()
+
+            
     def action_post(self):
         for record in self:
             # Verificamos el monto total de la factura y evaluamos si hay que identificar el C.F.A.
@@ -98,7 +151,7 @@ class AccountMove(models.Model):
                     ('code', 'ilike', '%MP%'),
                     ('operating_unit_id', '=', record.operating_unit_id.id)
                 ], limit=1)
-
+                
                 if not journal_mp:
                     raise ValidationError("No se encontró un diario de Mercado Pago. \n Si está creado cambiar el código por MP ")
                 
