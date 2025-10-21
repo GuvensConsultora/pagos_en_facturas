@@ -11,7 +11,7 @@ class AccountMove(models.Model):
     x_nro_mp = fields.Char(String="Nro. Transacción M.P.")
     x_imp_tarj = fields.Float(String="Importe Tarjeta.")
     x_nro_tarj = fields.Char(String="Nro cupón Tarjeta")
-    x_saldo_favor = fields.FLoat(String="Saldo a Favor",
+    x_saldo_favor = fields.Float(String="Saldo a Favor",
                                  compute="_saldo_favor", # Revisión de recibos con saldo a favor del cliente.
                                  store=True, # Alamaceno el valor en la base de datos.
                                  readonly = True, # Solo lectura. 
