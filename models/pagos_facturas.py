@@ -56,7 +56,7 @@ class AccountMove(models.Model):
         self.ensure_one()
         domain = [
             ('partner_id', '=', self.partner_id.id),
-            ('account_id.internal_type', '=', 'receivable'),
+            ('account_id.account_type', '=', 'receivable'),
             ('reconciled', '=', False),
             ('balance', '<', 0),                 # crédito
             ('move_id.state', '=', 'posted'),
