@@ -1,5 +1,10 @@
 from odoo import models, fields, api
 from odoo.exceptions import ValidationError
+import logging
+
+_logger = logging.getLogger(__name__)
+
+
 
 class AccountMove(models.Model):
     _inherit = 'account.move'
@@ -43,14 +48,35 @@ class AccountMove(models.Model):
             rec.x_neto = rec.amount_total - rec.x_efectivo - rec.x_imp_mp - rec.x_imp_tarj
 ###################################################
     # Revisamos los valores residuales de los pagos para determinar saldo a favor
-    def _is_immediate_payment_term(self):
-        self.ensure_one()
-        pt = self.invoice_payment_term_id
-        if not pt:
-            return True
-        l = pt.line_ids
-        return len(l) == 1 and not (l.days or l.months or l.days_after)
 
+    def _is_immediate_payment_term(self):
+
+         """Lee el término de la factura y loguea si coincide con 'Pago inmediato'."""
+        PayTerm = self.env['account.payment.term']
+        # A) Intento por XML-ID (si existe en tu base)
+        pt_immediate = self.env.ref('account.account_payment_term_immediate', raise_if_not_found=False)
+        # B) Fallback por nombre exacto (ajusta si tu nombre difiere)
+        if not pt_immediate:
+            pt_immediate = PayTerm.search([('name', '=', 'Pago inmediato')], limit=1)
+
+        for inv in self:
+            term = inv.invoice_payment_term_id
+            if not term:
+                _logger.info("Factura %s sin término de pago.", inv.id)
+                continue
+            if not pt_immediate:
+                _logger.warning("No encuentro el término 'Pago inmediato' (ni por XML-ID ni por nombre).")
+                continue
+
+            if term.id == pt_immediate.id:
+                _logger.info("OK: Factura %s usa 'Pago inmediato' (term_id=%s).", inv.id, term.id)
+            else:
+                _logger.info("NO: Factura %s usa otro término (term_id=%s, esperado=%s).",
+                             inv.id, term.id, pt_immediate.id)
+
+
+
+        
     def _ou_credit_available(self):
         """Suma créditos (líneas a cobrar negativas y no conciliadas) en misma OU."""
         self.ensure_one()
