@@ -51,7 +51,7 @@ class AccountMove(models.Model):
 
     def _is_immediate_payment_term(self):
 
-         """Lee el término de la factura y loguea si coincide con 'Pago inmediato'."""
+        """Lee el término de la factura y loguea si coincide con 'Pago inmediato'."""
         PayTerm = self.env['account.payment.term']
         # A) Intento por XML-ID (si existe en tu base)
         pt_immediate = self.env.ref('account.account_payment_term_immediate', raise_if_not_found=False)
