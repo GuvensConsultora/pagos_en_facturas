@@ -45,7 +45,7 @@ class AccountMove(models.Model):
     # Revisamos los valores residuales de los pagos para determinar saldo a favor
     def _is_immediate_payment_term(self):
         self.ensure_one()
-        pt = self.payment_term_id
+        pt = self.invoice_payment_term_id
         if not pt:
             return True
         l = pt.line_ids
@@ -85,12 +85,12 @@ class AccountMove(models.Model):
     def write(self, vals):
         res = super().write(vals)
         # Recalcular si cambian partner/OU/pt/total
-        watched = {'partner_id', 'operating_unit_id', 'payment_term_id', 'invoice_line_ids'}
+        watched = {'partner_id', 'operating_unit_id', 'invoice_payment_term_id', 'invoice_line_ids'}
         if watched & set(vals.keys()):
             self._recalc_x_saldo_favor()
         return res
 
-    @api.onchange('partner_id', 'operating_unit_id', 'payment_term_id', 'invoice_line_ids')
+    @api.onchange('partner_id', 'operating_unit_id', 'invoice_payment_term_id', 'invoice_line_ids')
     def _onchange_recalc_saldo(self):
         # feedback inmediato en UI (draft)
         self._recalc_x_saldo_favor()
