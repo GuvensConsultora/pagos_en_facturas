@@ -14,7 +14,7 @@
 		    <field name="x_nro_mp" string="Nro operacion en M.P." />
 		    <field name="x_imp_tarj" string="Monto en Tarjeta:" />
 		    <field name="x_nro_tarj" string="Nro de cupón: " />
-			<field name="x_saldo_favor" string="Saldo a Favor: " readonly="1"/>
+		    <field name="x_saldo_favor" string="Saldo a Favor: " readonly="1"/>
 		    <field name="x_neto" string="Monto neto a pagar: " readonly="1" />
                   </group> 
                 </xpath>
@@ -25,7 +25,6 @@
 	  <field name="model">res.company</field>
 	  <field name="inherit_id" ref="base.view_company_form"/>
 	  <field name="arch" type="xml">
-
 	    <!-- Inserta x_tope_cf justo después de VAT -->
 	    <xpath expr="//notebook/page[@name='general_info']//field[@name='vat']"
 		   position="after">
