@@ -73,10 +73,7 @@ class AccountMove(models.Model):
             else:
                 _logger.info("NO: Factura %s usa otro término (term_id=%s, esperado=%s).",
                              inv.id, term.id, pt_immediate.id)
-
-
-
-        
+    
     def _ou_credit_available(self):
         """Suma créditos (líneas a cobrar negativas y no conciliadas) en misma OU."""
         self.ensure_one()
@@ -120,7 +117,7 @@ class AccountMove(models.Model):
     def _onchange_recalc_saldo(self):
         # feedback inmediato en UI (draft)
         self._recalc_x_saldo_favor()
-
+        raise UserError("Hola mundo")
             
     def action_post(self):
         for record in self:
