@@ -93,7 +93,7 @@ class AccountMove(models.Model):
 
     def _recalc_x_saldo_favor(self):  # Recalculo el saldo\
         for rec in self:
-            raise UserError (f"Cantidades {len(self)}. Nombre {rec.name}")
+            raise UserError (f"Cantidades {len(self)}. Nombre {rec.partner_id}")
         for inv in self.filtered(lambda m: m.move_type == 'out_invoice'):
             if inv._is_immediate_payment_term():
                 credito = inv._ou_credit_available()
