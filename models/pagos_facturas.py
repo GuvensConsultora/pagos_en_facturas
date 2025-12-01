@@ -91,8 +91,8 @@ class AccountMove(models.Model):
         # balance es negativo → crédito positivo
         return sum(-l.balance for l in lines)
 
-    def _recalc_x_saldo_favor(self):
-        raise UserError(f" L95 ")
+    def _recalc_x_saldo_favor(self):  # Recalculo el saldo\
+        raise UserError(f"Datos propios {self}")
         for inv in self.filtered(lambda m: m.move_type == 'out_invoice'):
             if inv._is_immediate_payment_term():
                 credito = inv._ou_credit_available()
