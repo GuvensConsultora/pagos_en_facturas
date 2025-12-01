@@ -95,6 +95,7 @@ class AccountMove(models.Model):
         for inv in self.filtered(lambda m: m.move_type == 'out_invoice'):
             if inv._is_immediate_payment_term():
                 credito = inv._ou_credit_available()
+                raise UserError(f" linea 98 Credito: {credito}")
                 inv.x_saldo_favor = min(credito, inv.amount_total or 0.0)
             else:
                 inv.x_saldo_favor = 0.0
@@ -117,7 +118,7 @@ class AccountMove(models.Model):
     def _onchange_recalc_saldo(self):
         # feedback inmediato en UI (draft)
         self._recalc_x_saldo_favor()
-        raise UserError("Hola mundo")
+        raise UserError(" L121 Hola mundo")
             
     def action_post(self):
         for record in self:
