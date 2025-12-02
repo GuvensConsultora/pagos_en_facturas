@@ -101,9 +101,13 @@ class AccountMove(models.Model):
                 ('amount_residual', '!=', 0)          # Evitar basura técnica con residual 0
             ]
 
-            
+            resultado = self.env['account.move.line'].read_group(
+        domain=domain,
+        fields=['amount_residual'], 
+        groupby=['partner_id']
+    )
         
-            raise UserError (f"Cantidades {len(self)}. Nombre {rec.partner_id.id} Dominio {domain}")
+            raise UserError (f"Cantidades {len(self)}. Nombre {rec.partner_id.id} Dominio {domain} Resultado {resultado}")
         for inv in self.filtered(lambda m: m.move_type == 'out_invoice'):
             if inv._is_immediate_payment_term():
                 credito = inv._ou_credit_available()
