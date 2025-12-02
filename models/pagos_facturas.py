@@ -17,6 +17,7 @@ class AccountMove(models.Model):
     x_imp_tarj = fields.Float(String="Importe Tarjeta.")
     x_nro_tarj = fields.Char(String="Nro cupón Tarjeta")
     x_saldo_favor = fields.Float(String="Saldo a Favor",
+                                 compute='_compute_saldo_favor',
                                  store=True, # Alamaceno el valor en la base de datos.
                                  readonly = True, # Solo lectura. 
                                  digits = 'Product Price', # Deinimos la precisión ... seguramente hay otros modelos.
@@ -44,8 +45,14 @@ class AccountMove(models.Model):
 
     @api.depends('amount_total', 'x_efectivo', 'x_imp_mp','x_imp_tarj')
     def _compute_neto(self):
-        for rec in self:
+        for rec in self:   
             rec.x_neto = rec.amount_total - rec.x_efectivo - rec.x_imp_mp - rec.x_imp_tarj
+
+    def _compute_saldo_favor(self):
+        for rec in self:
+            rec.x_saldo_favor = self._recalc_x_saldo_favor()
+
+    
 ###################################################
     # Revisamos los valores residuales de los pagos para determinar saldo a favor
 
@@ -74,22 +81,22 @@ class AccountMove(models.Model):
                 _logger.info("NO: Factura %s usa otro término (term_id=%s, esperado=%s).",
                              inv.id, term.id, pt_immediate.id)
     
-    def _ou_credit_available(self):
-        """Suma créditos (líneas a cobrar negativas y no conciliadas) en misma OU."""
-        self.ensure_one()
-        domain = [
-            ('partner_id', '=', self.partner_id.id),
-            ('account_id.account_type', '=', 'receivable'),
-            ('reconciled', '=', False),
-            ('balance', '<', 0),                 # crédito
-            ('move_id.state', '=', 'posted'),
-        ]
-        # (supuesto) OCA operating_unit instalado
-        if 'operating_unit_id' in self._fields and self.operating_unit_id:
-            domain.append(('operating_unit_id', '=', self.operating_unit_id.id))
-        lines = self.env['account.move.line'].search(domain)
-        # balance es negativo → crédito positivo
-        return sum(-l.balance for l in lines)
+    # def _ou_credit_available(self):
+    #     """Suma créditos (líneas a cobrar negativas y no conciliadas) en misma OU."""
+    #     self.ensure_one()
+    #     domain = [
+    #         ('partner_id', '=', self.partner_id.id),
+    #         ('account_id.account_type', '=', 'receivable'),
+    #         ('reconciled', '=', False),
+    #         ('balance', '<', 0),                 # crédito
+    #         ('move_id.state', '=', 'posted'),
+    #     ]
+    #     # (supuesto) OCA operating_unit instalado
+    #     if 'operating_unit_id' in self._fields and self.operating_unit_id:
+    #         domain.append(('operating_unit_id', '=', self.operating_unit_id.id))
+    #     lines = self.env['account.move.line'].search(domain)
+    #     # balance es negativo → crédito positivo
+    #     return sum(-l.balance for l in lines)
 
     def _recalc_x_saldo_favor(self):  # Recalculo el saldo\
         for rec in self:
@@ -106,7 +113,8 @@ class AccountMove(models.Model):
                 fields=['amount_residual'], 
                 groupby=['partner_id']
             )
-        
+
+            return resultado[0]['amount_residual']
             #raise UserError (f"Cantidades {len(self)}. Nombre {rec.partner_id.id} Dominio {domain} Resultado {resultado[0]['amount_residual']}")
         # for inv in self.filtered(lambda m: m.move_type == 'out_invoice'):
         #     if inv._is_immediate_payment_term():
