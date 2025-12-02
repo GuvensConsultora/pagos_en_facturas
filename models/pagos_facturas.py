@@ -108,13 +108,17 @@ class AccountMove(models.Model):
                 ('amount_residual', '!=', 0)          # Evitar basura técnica con residual 0
             ]
 
+
             resultado = self.env['account.move.line'].read_group(
                 domain=domain,
                 fields=['amount_residual'], 
                 groupby=['partner_id']
             )
 
-            return resultado[0]['amount_residual']
+
+            # Si 'resultado' tiene datos, dame el valor. Si no (lista vacía), devuelve 0.0
+            return resultado[0]['amount_residual'] if resultado else 0.0
+            
             #raise UserError (f"Cantidades {len(self)}. Nombre {rec.partner_id.id} Dominio {domain} Resultado {resultado[0]['amount_residual']}")
         # for inv in self.filtered(lambda m: m.move_type == 'out_invoice'):
         #     if inv._is_immediate_payment_term():
