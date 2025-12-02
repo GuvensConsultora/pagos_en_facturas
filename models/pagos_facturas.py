@@ -93,7 +93,18 @@ class AccountMove(models.Model):
 
     def _recalc_x_saldo_favor(self):  # Recalculo el saldo\
         for rec in self:
-            raise UserError (f"Cantidades {len(self)}. Nombre {rec.partner_id.name}")
+            domain = [('partner_id', '=', rec.partner_id.id),
+                      ('parent_state', '=', 'posted'),      # Solo asientos confirmados
+                      ('reconciled', '=', False),           # <--- EL GRAN FILTRO (Solo lo abierto)
+                      ('account_id.account_type', 'in', ('asset_receivable', 'liability_payable')),
+                      ('amount_residual', '!=', 0)          # Evitar basura técnica con residual 0
+                      ]
+
+            # Sumamos 'amount_residual', NO 'balance'
+            resultado = self.env['account.move.line'].read_group(domain=domain,fields=['amount_residual'],groupby=['partner_id']
+    )
+
+            raise UserError (f"Cantidades {len(self)}. Nombre {rec.partner_id.name} monto de saldo a favor: {resultado}")
         for inv in self.filtered(lambda m: m.move_type == 'out_invoice'):
             if inv._is_immediate_payment_term():
                 credito = inv._ou_credit_available()
