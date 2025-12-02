@@ -107,7 +107,7 @@ class AccountMove(models.Model):
         groupby=['partner_id']
     )
         
-            raise UserError (f"Cantidades {len(self)}. Nombre {rec.partner_id.id} Dominio {domain} Resultado {resultado}")
+            raise UserError (f"Cantidades {len(self)}. Nombre {rec.partner_id.id} Dominio {domain} Resultado {resultado[0]['amount_residual']}")
         for inv in self.filtered(lambda m: m.move_type == 'out_invoice'):
             if inv._is_immediate_payment_term():
                 credito = inv._ou_credit_available()
