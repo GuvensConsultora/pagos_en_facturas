@@ -102,19 +102,19 @@ class AccountMove(models.Model):
             ]
 
             resultado = self.env['account.move.line'].read_group(
-        domain=domain,
-        fields=['amount_residual'], 
-        groupby=['partner_id']
-    )
+                domain=domain,
+                fields=['amount_residual'], 
+                groupby=['partner_id']
+            )
         
-            raise UserError (f"Cantidades {len(self)}. Nombre {rec.partner_id.id} Dominio {domain} Resultado {resultado[0]['amount_residual']}")
-        for inv in self.filtered(lambda m: m.move_type == 'out_invoice'):
-            if inv._is_immediate_payment_term():
-                credito = inv._ou_credit_available()
-                raise UserError(f" linea 98 Credito: {credito}")
-                inv.x_saldo_favor = min(credito, inv.amount_total or 0.0)
-            else:
-                inv.x_saldo_favor = 0.0
+            #raise UserError (f"Cantidades {len(self)}. Nombre {rec.partner_id.id} Dominio {domain} Resultado {resultado[0]['amount_residual']}")
+        # for inv in self.filtered(lambda m: m.move_type == 'out_invoice'):
+        #     if inv._is_immediate_payment_term():
+        #         credito = inv._ou_credit_available()
+        #         raise UserError(f" linea 98 Credito: {credito}")
+        #         inv.x_saldo_favor = min(credito, inv.amount_total or 0.0)
+        #     else:
+        #         inv.x_saldo_favor = 0.0
 
     @api.model
     def create(self, vals):
