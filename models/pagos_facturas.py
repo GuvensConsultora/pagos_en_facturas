@@ -134,7 +134,7 @@ class AccountMove(models.Model):
     def _onchange_recalc_saldo(self):
         # feedback inmediato en UI (draft)
         self._recalc_x_saldo_favor()
-        raise UserError(" L121 Hola mundo")
+        
             
     def action_post(self):
         for record in self:
