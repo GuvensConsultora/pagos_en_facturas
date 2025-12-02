@@ -101,7 +101,7 @@ class AccountMove(models.Model):
                       ]
 
             # Sumamos 'amount_residual', NO 'balance'
-            resultado = self.env['account.move.line'].read_group(domain=domain,fields=['amount_residual'],groupby=['partner_id']
+            resultado = self.env['account.move.line'].read_group(domain=domain,fields=['amount_residual'],groupby=['rec.partner_id.id']
     )
 
             raise UserError (f"Cantidades {len(self)}. Nombre {rec.partner_id.name} monto de saldo a favor: {resultado}")
