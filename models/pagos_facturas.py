@@ -42,10 +42,13 @@ class AccountMove(models.Model):
                 raise ValidationError("Falta el Nro. de Cupón de la Tarjeta.")
 
     # --- CÁLCULOS (COMPUTE) ---
-    @api.depends('amount_total', 'x_efectivo', 'x_imp_mp','x_imp_tarj')
+    @api.depends('amount_total', 'x_efectivo', 'x_imp_mp','x_imp_tarj','x_saldo_favor')
     def _compute_neto(self):
-        for rec in self:   
-            rec.x_neto = rec.amount_total - rec.x_efectivo - rec.x_imp_mp - rec.x_imp_tarj
+        for rec in self:
+            if rec.x_saldo_favor >= rec.x_neto:
+                rec.x_neto = 0
+            else:
+                rec.x_neto = rec.amount_total - rec.x_efectivo - rec.x_imp_mp - rec.x_imp_tarj - rec.saldo_favor
 
     @api.depends('partner_id', 'state')        
     def _compute_saldo_favor(self):
@@ -63,7 +66,7 @@ class AccountMove(models.Model):
                 ('parent_state', '=', 'posted'),
                 ('reconciled', '=', False),
                 ('account_id.account_type', '=', 'asset_receivable'), # Solo cuentas a cobrar
-                ('amount_residual', '<', 0) # Solo saldos negativos (a favor)
+                ('amount_residual', '!=', 0) # Todo lo que no esté conciliado
             ]
 
             # 2. Consulta SQL Rápida
