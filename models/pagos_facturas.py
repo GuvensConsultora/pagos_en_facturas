@@ -48,7 +48,7 @@ class AccountMove(models.Model):
             if rec.x_saldo_favor >= rec.amount_total:
                 rec.x_neto = 0
             else:
-                rec.x_neto = rec.amount_total - rec.x_efectivo - rec.x_imp_mp - rec.x_imp_tarj - rec.saldo_favor
+                rec.x_neto = rec.amount_total - rec.x_efectivo - rec.x_imp_mp - rec.x_imp_tarj - rec.x_saldo_favor
 
     @api.depends('partner_id', 'state', 'amount_total')        
     def _compute_saldo_favor(self):
