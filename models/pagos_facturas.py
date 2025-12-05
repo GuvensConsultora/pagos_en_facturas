@@ -45,7 +45,7 @@ class AccountMove(models.Model):
     @api.depends('amount_total', 'x_efectivo', 'x_imp_mp','x_imp_tarj','x_saldo_favor')
     def _compute_neto(self):
         for rec in self:
-            if rec.x_saldo_favor >= rec.x_neto:
+            if rec.x_saldo_favor >= rec.amount_total:
                 rec.x_neto = 0
             else:
                 rec.x_neto = rec.amount_total - rec.x_efectivo - rec.x_imp_mp - rec.x_imp_tarj - rec.saldo_favor
