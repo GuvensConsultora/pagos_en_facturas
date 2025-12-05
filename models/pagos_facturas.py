@@ -50,7 +50,7 @@ class AccountMove(models.Model):
             else:
                 rec.x_neto = rec.amount_total - rec.x_efectivo - rec.x_imp_mp - rec.x_imp_tarj - rec.saldo_favor
 
-    @api.depends('partner_id', 'state')        
+    @api.depends('partner_id', 'state', 'amount_total')        
     def _compute_saldo_favor(self):
         """
         Calcula el saldo a favor (créditos no aplicados) del cliente.
