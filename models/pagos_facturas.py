@@ -87,19 +87,17 @@ class AccountMove(models.Model):
     def _onchange_partner_update_saldo(self):
         # Al cambiar el partner, forzamos el recálculo visualmente
         self._compute_saldo_favor()
-
-        
             
     def action_post(self):
         for record in self:
-            # Verificamos el monto total de la factura y evaluamos si hay que identificar el C.F.A.
-            #vat = self.env['res.partner'].browse(record.partner_id.id).vat
-            #if record.amount_total >= self.env.company.x_tope_cf and not vat :
-            #    raise ValidationError("Este comprobante supera el importe establecido para no identificar al Consumidor Final. Por favor cree el contacto identificandolo completamente con su nro de cuil cuit o dni. O modifique el tope establecido en la compañía.")
-            
             # Solo realizamos la validación si el div de pagos debería ser visible
-            if record.invoice_payment_term_id.id == 1:
-                if record.x_neto != 0:
+            if record.invoice_payment_term_id.id == 1:  #Verificamos que sea pago inmediato
+                if record.x_saldo_favor >= record.x_neto:
+                    # posteo la factura si no está posteada y evito bucle.
+                    if record.state != 'posted':  
+                        res_pos = super().action_post()
+
+                if record.x_neto != 0:  # Si el neto a pargar es diferente a cero bloquea
                     raise ValidationError(
                         "No se puede validar la factura. El 'Neto a Cancelar' (Monto Neto Calculado) debe ser cero."
                         "Por favor, ajuste los pagos (Efectivo, Mercado Pago, Tarjeta) para que el neto sea cero."
@@ -147,8 +145,7 @@ class AccountMove(models.Model):
                 ], limit=1)
                 
                 if not journal_mp:
-                    raise ValidationError("No se encontró un diario de Mercado Pago. \n Si está creado cambiar el código por MP ")
-                
+                    raise ValidationError("No se encontró un diario de Mercado Pago. \n Si está creado cambiar el código por MP ")      
                 # Crear el pago de Mercado Pago
                 if record.x_imp_mp > 0:
                     self.env['account.payment'].create({
