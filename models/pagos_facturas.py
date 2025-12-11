@@ -1,3 +1,4 @@
+
 from odoo import models, fields, api
 from odoo.exceptions import ValidationError, UserError
 import logging
@@ -64,7 +65,7 @@ class AccountMove(models.Model):
         Calcula el saldo a favor (créditos no aplicados) del cliente.
         """
         for rec in self:
-            if not rec.partner_id:
+            if not rec.partner_id or rec.partner_id.x_no_saldo_favor:
                 rec.x_saldo_favor = 0.0
                 continue
 
