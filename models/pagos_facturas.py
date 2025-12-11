@@ -4,6 +4,14 @@ import logging
 
 _logger = logging.getLogger(__name__)
 
+class ModPartner(models.Model):
+    _inherit = 'res.partner'
+    _description = 'Agregar Campo booleano de no calcular saldo a favor'
+
+    #--- CAMPO -----
+    x_no_saldo_favor = fields.Boolean(string="No calcula saldo a favor", default=False)
+
+
 class AccountMove(models.Model):
     _inherit = 'account.move'
     _description = 'Registro de pagos directos en factura'
@@ -92,7 +100,7 @@ class AccountMove(models.Model):
         for record in self:
             # Solo realizamos la validación si el div de pagos debería ser visible
             if record.invoice_payment_term_id.id == 1:  #Verificamos que sea pago inmediato
-                if record.x_saldo_favor >= record.x_neto:
+                if record.x_saldo_favor >= rec.amount_total:
                     #raise UserError(f" Saldo a favor {record.x_saldo_favor} Neto: {record.x_neto}")
                     # posteo la factura si no está posteada y evito bucle.
                     if record.state != 'posted':  
