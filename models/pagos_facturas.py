@@ -93,7 +93,7 @@ class AccountMove(models.Model):
             # Solo realizamos la validación si el div de pagos debería ser visible
             if record.invoice_payment_term_id.id == 1:  #Verificamos que sea pago inmediato
                 if record.x_saldo_favor >= record.x_neto:
-                    raise UserError(f" Saldo a favor {record.x_saldo_favor} Neto: {record.x_neto|")
+                    raise UserError(f" Saldo a favor {record.x_saldo_favor} Neto: {record.x_neto}")
                     # posteo la factura si no está posteada y evito bucle.
                     if record.state != 'posted':  
                         res_pos = super().action_post()
