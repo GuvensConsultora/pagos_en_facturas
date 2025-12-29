@@ -7,7 +7,7 @@
         <field name="arch" type="xml">
             
             <xpath expr="//field[@name='property_delivery_carrier_id']" position="after">
-                <field name="x_no_saldo_favor"/>
+               <!-- <field name="x_no_saldo_favor"/> -->
             </xpath>
 
         </field>
