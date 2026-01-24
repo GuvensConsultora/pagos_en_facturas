@@ -14,7 +14,8 @@
 		    <field name="x_nro_mp" string="Nro operacion en M.P." />
 		    <field name="x_imp_tarj" string="Monto en Tarjeta:" />
 		    <field name="x_nro_tarj" string="Nro de cupón: " />
-		    <field name="x_saldo_favor" string="Saldo a Favor: " readonly="1"/>
+		    <!-- Saldo a Favor: visible para todos, editable solo por base.group_system -->
+		    <field name="x_saldo_favor" string="Saldo a Favor: " readonly="not user.has_group('base.group_system')"/>
 		    <field name="x_neto" string="Monto neto a pagar: " readonly="1" />
                   </group> 
                 </xpath>

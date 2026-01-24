@@ -27,11 +27,14 @@ class AccountMove(models.Model):
     # Nota del Profesor: store=True en un saldo vivo es delicado. 
     # Si otro usuario paga una factura vieja, este campo NO se enterará automáticamente 
     # hasta que edites esta factura. Para este caso, está bien así.
+    # Saldo a favor: calculado automáticamente pero editable por admins (base.group_system)
+    # readonly=False permite sobreescribir el valor computado manualmente
     x_saldo_favor = fields.Monetary(
         string="Saldo a Favor Disponible",
         compute='_compute_saldo_favor',
-        store=True, 
-        currency_field='currency_id' # Importante para campos monetarios
+        store=True,
+        readonly=False,
+        currency_field='currency_id'
     )
     
     x_neto = fields.Monetary(
@@ -88,7 +91,8 @@ class AccountMove(models.Model):
             # 3. Asignación Segura (Evitamos el IndexError)
             saldo = resultado[0]['amount_residual'] if resultado else 0.0
             
-            # 4. Solo si saldo < 0 (crédito real), lo guardamos en positivo
+            # 4. Solo asignamos saldo a favor si amount_residual < 0 (crédito real)
+            # amount_residual > 0 = deuda del cliente, no es saldo a favor
             rec.x_saldo_favor = abs(saldo) if saldo < 0 else 0.0
 
     # --- ONCHANGE (Para feedback inmediato en UI) ---
