@@ -88,8 +88,8 @@ class AccountMove(models.Model):
             # 3. Asignación Segura (Evitamos el IndexError)
             saldo = resultado[0]['amount_residual'] if resultado else 0.0
             
-            # 4. Guardamos en positivo (abs) para visualización
-            rec.x_saldo_favor = abs(saldo)
+            # 4. Solo si saldo < 0 (crédito real), lo guardamos en positivo
+            rec.x_saldo_favor = abs(saldo) if saldo < 0 else 0.0
 
     # --- ONCHANGE (Para feedback inmediato en UI) ---
     @api.onchange('partner_id')
