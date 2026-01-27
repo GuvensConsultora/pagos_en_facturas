@@ -7,6 +7,7 @@
              'security/ir.model.access.csv',
              'views/res_partner_view.xml',
              ],
+    'post_init_hook':'post_init_hook'
 
     'assets': {
         'web.assets_frontend': [
