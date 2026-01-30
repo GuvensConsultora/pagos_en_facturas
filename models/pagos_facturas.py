@@ -12,6 +12,26 @@ class ModPartner(models.Model):
     #--- CAMPO -----
     x_no_saldo_favor = fields.Boolean(string="No calcula saldo a favor", default=False)
 
+    def init(self):
+        """
+        // Por qué: Garantiza que la columna exista en la DB antes de que el ORM la consulte.
+        // Patrón: init() corre en CADA arranque del servidor (no solo en -u), ideal para
+        //         asegurar schema sin depender de que el admin haga upgrade manual.
+        // Tip: Siempre llamar super().init() para no romper la cadena de inicialización.
+        """
+        super().init()
+        self._cr.execute("""
+            SELECT 1
+              FROM information_schema.columns
+             WHERE table_name = 'res_partner'
+               AND column_name = 'x_no_saldo_favor'
+             LIMIT 1
+        """)
+        if not self._cr.fetchone():
+            self._cr.execute(
+                "ALTER TABLE res_partner ADD COLUMN x_no_saldo_favor boolean DEFAULT false"
+            )
+
 
 class AccountMove(models.Model):
     _inherit = 'account.move'
