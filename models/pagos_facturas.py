@@ -12,25 +12,28 @@ class ModPartner(models.Model):
     #--- CAMPO -----
     x_no_saldo_favor = fields.Boolean(string="No calcula saldo a favor", default=False)
 
-    def init(self):
+    def _auto_init(self):
         """
-        // Por qué: Garantiza que la columna exista en la DB antes de que el ORM la consulte.
-        // Patrón: init() corre en CADA arranque del servidor (no solo en -u), ideal para
-        //         asegurar schema sin depender de que el admin haga upgrade manual.
-        // Tip: Siempre llamar super().init() para no romper la cadena de inicialización.
+        // Por qué: _auto_init es el hook oficial de Odoo para cambios de schema.
+        //   Se ejecuta ANTES de que el ORM intente consultar el modelo,
+        //   evitando el error "column does not exist".
+        // Patrón: IF NOT EXISTS evita error si la columna ya existe.
+        //   SAVEPOINT protege la transacción principal ante fallos.
+        // Tip: init() NO corre en cada arranque — solo durante install/upgrade.
+        //   _auto_init es el lugar correcto para garantizar schema.
         """
-        super().init()
-        self._cr.execute("""
-            SELECT 1
-              FROM information_schema.columns
-             WHERE table_name = 'res_partner'
-               AND column_name = 'x_no_saldo_favor'
-             LIMIT 1
-        """)
-        if not self._cr.fetchone():
-            self._cr.execute(
-                "ALTER TABLE res_partner ADD COLUMN x_no_saldo_favor boolean DEFAULT false"
-            )
+        # Crear columna ANTES de que super() intente operar con ella
+        cr = self.env.cr
+        cr.execute("SAVEPOINT _ensure_x_no_saldo_favor")
+        try:
+            cr.execute("""
+                ALTER TABLE res_partner
+                ADD COLUMN IF NOT EXISTS x_no_saldo_favor boolean DEFAULT false
+            """)
+            cr.execute("RELEASE SAVEPOINT _ensure_x_no_saldo_favor")
+        except Exception:
+            cr.execute("ROLLBACK TO SAVEPOINT _ensure_x_no_saldo_favor")
+        return super()._auto_init()
 
 
 class AccountMove(models.Model):

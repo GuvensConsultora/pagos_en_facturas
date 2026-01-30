@@ -1,6 +1,6 @@
 {
     'name': "pagos_en_facturas",
-    'version': '17.0',
+    'version': '17.0.1.0.1',
     'category': 'Custom',
     'depends': ['base','account','delivery'],
     'data': ['views/view.xml',
