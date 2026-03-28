@@ -129,12 +129,12 @@ class AccountMove(models.Model):
         self._compute_saldo_favor()
             
     def action_post(self):
-        for record in self:
-            # Solo procesamos pagos si la compañía tiene habilitado pagos en factura
-            if not record.company_id.x_use_pagos_factura:
-                if record.state != 'posted':
-                    super().action_post()
-                continue
+        # Separar facturas según si la compañía tiene habilitado pagos en factura
+        sin_pagos = self.filtered(lambda r: not r.company_id.x_use_pagos_factura)
+        if sin_pagos:
+            super(AccountMove, sin_pagos).action_post()
+        con_pagos = self - sin_pagos
+        for record in con_pagos:
             # Solo realizamos la validación si el div de pagos debería ser visible
             if record.invoice_payment_term_id.id == 1:  #Verificamos que sea pago inmediato
                 if record.x_saldo_favor >= record.amount_total:

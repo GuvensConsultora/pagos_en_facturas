@@ -15,16 +15,3 @@ class TopeConsFinal(models.Model):
         default=False,
         help="Activa la sección de pagos directos (efectivo, MP, tarjeta) en las facturas de esta compañía.",
     )
-
-    def _auto_init(self):
-        cr = self.env.cr
-        cr.execute("SAVEPOINT _ensure_x_use_pagos_factura")
-        try:
-            cr.execute("""
-                ALTER TABLE res_company
-                ADD COLUMN IF NOT EXISTS x_use_pagos_factura boolean DEFAULT false
-            """)
-            cr.execute("RELEASE SAVEPOINT _ensure_x_use_pagos_factura")
-        except Exception:
-            cr.execute("ROLLBACK TO SAVEPOINT _ensure_x_use_pagos_factura")
-        return super()._auto_init()
