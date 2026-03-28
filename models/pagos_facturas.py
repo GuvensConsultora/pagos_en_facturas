@@ -42,8 +42,8 @@ class AccountMove(models.Model):
 
     # --- CAMPOS ---
     x_use_pagos_factura = fields.Boolean(
-        related='company_id.x_use_pagos_factura',
         string="Usa Pagos en Factura",
+        compute='_compute_use_pagos_factura',
     )
     x_efectivo = fields.Float(string="Importe Efectivo")
     x_imp_mp = fields.Float(string="Importe Mercado Pago")
@@ -70,6 +70,11 @@ class AccountMove(models.Model):
         store=True,
         currency_field='currency_id'
     )
+
+    @api.depends('company_id')
+    def _compute_use_pagos_factura(self):
+        for rec in self:
+            rec.x_use_pagos_factura = rec.company_id.x_use_pagos_factura if 'x_use_pagos_factura' in self.env['res.company']._fields else False
 
     # --- CONSTRAINS & VALIDACIONES ---
     @api.constrains('x_imp_mp', 'x_nro_mp', 'x_imp_tarj', 'x_nro_tarj')
