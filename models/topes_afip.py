@@ -10,3 +10,8 @@ class TopeConsFinal(models.Model):
             "Si la operación supera este monto, el sistema solicitará identificar "
             "al comprador (CUIT/CUIL/DNI) conforme RG 5700/2025."
         ),)
+    x_use_pagos_factura = fields.Boolean(
+        string="Habilitar Pagos en Facturas",
+        default=False,
+        help="Activa la sección de pagos directos (efectivo, MP, tarjeta) en las facturas de esta compañía.",
+    )

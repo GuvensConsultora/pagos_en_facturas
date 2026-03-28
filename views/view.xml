@@ -6,8 +6,9 @@
             <field name="inherit_id" ref="account.view_move_form"/>
             <field name="arch" type="xml">
                 <xpath expr="//group[@id='header_left_group']" position="inside">
+		  <field name="x_use_pagos_factura" invisible="1"/>
 		  <group name="div_pago_inmediato" colspan="2"
-			 invisible="invoice_payment_term_id != 1"
+			 invisible="not x_use_pagos_factura or invoice_payment_term_id != 1"
 			 style="background-color: #FFEBEE; border-radius: 5px;">
 		    <field name="x_efectivo" string="Monto en efectivo: "/>
 		    <field name="x_imp_mp" string="Monto en M.P." />
@@ -32,6 +33,7 @@
 	    <xpath expr="//notebook/page[@name='general_info']//field[@name='vat']"
 		   position="after">
               <!--<field name="x_tope_cf" string="Imp Max. Cons Fin Anónimo"/>-->
+	      <field name="x_use_pagos_factura"/>
 	    </xpath>
 
 	  </field>

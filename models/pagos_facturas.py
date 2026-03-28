@@ -41,6 +41,10 @@ class AccountMove(models.Model):
     _description = 'Registro de pagos directos en factura'
 
     # --- CAMPOS ---
+    x_use_pagos_factura = fields.Boolean(
+        related='company_id.x_use_pagos_factura',
+        string="Usa Pagos en Factura",
+    )
     x_efectivo = fields.Float(string="Importe Efectivo")
     x_imp_mp = fields.Float(string="Importe Mercado Pago")
     x_nro_mp = fields.Char(string="Nro. Transacción M.P.")
@@ -126,6 +130,11 @@ class AccountMove(models.Model):
             
     def action_post(self):
         for record in self:
+            # Solo procesamos pagos si la compañía tiene habilitado pagos en factura
+            if not record.company_id.x_use_pagos_factura:
+                if record.state != 'posted':
+                    super().action_post()
+                continue
             # Solo realizamos la validación si el div de pagos debería ser visible
             if record.invoice_payment_term_id.id == 1:  #Verificamos que sea pago inmediato
                 if record.x_saldo_favor >= record.amount_total:
