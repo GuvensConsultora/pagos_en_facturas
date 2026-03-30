@@ -42,9 +42,16 @@ class AccountMove(models.Model):
 
     # --- CAMPOS ---
     x_use_pagos_factura = fields.Boolean(
-        related='company_id.x_use_pagos_factura',
         string="Usa Pagos en Factura",
+        compute='_compute_use_pagos_factura',
     )
+
+    @api.depends_context('company')
+    def _compute_use_pagos_factura(self):
+        # Evalúa siempre contra la empresa activa (seleccionada para operar), no la del registro
+        habilitado = self.env.company.x_use_pagos_factura
+        for rec in self:
+            rec.x_use_pagos_factura = habilitado
     x_efectivo = fields.Float(string="Importe Efectivo")
     x_imp_mp = fields.Float(string="Importe Mercado Pago")
     x_nro_mp = fields.Char(string="Nro. Transacción M.P.")
@@ -129,8 +136,9 @@ class AccountMove(models.Model):
         self._compute_saldo_favor()
             
     def action_post(self):
-        # Separar facturas según si la compañía tiene habilitado pagos en factura
-        sin_pagos = self.filtered(lambda r: not r.company_id.x_use_pagos_factura)
+        # Verificar si la empresa activa (seleccionada para operar) tiene habilitado pagos en factura
+        empresa_activa = self.env.company
+        sin_pagos = self.filtered(lambda r: not empresa_activa.x_use_pagos_factura)
         if sin_pagos:
             super(AccountMove, sin_pagos).action_post()
         con_pagos = self - sin_pagos
