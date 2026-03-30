@@ -44,14 +44,14 @@ class AccountMove(models.Model):
     x_use_pagos_factura = fields.Boolean(
         string="Usa Pagos en Factura",
         compute='_compute_use_pagos_factura',
+        store=False,
     )
 
-    @api.depends_context('company')
+    @api.depends('company_id')
     def _compute_use_pagos_factura(self):
-        # Evalúa siempre contra la empresa activa (seleccionada para operar), no la del registro
-        habilitado = self.env.company.x_use_pagos_factura
+        # Depende de company_id para que el onchange lo recalcule en la vista
         for rec in self:
-            rec.x_use_pagos_factura = habilitado
+            rec.x_use_pagos_factura = bool(rec.company_id and rec.company_id.x_use_pagos_factura)
     x_efectivo = fields.Float(string="Importe Efectivo")
     x_imp_mp = fields.Float(string="Importe Mercado Pago")
     x_nro_mp = fields.Char(string="Nro. Transacción M.P.")
