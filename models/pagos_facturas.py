@@ -48,10 +48,12 @@ class AccountMove(models.Model):
     )
 
     @api.depends('company_id')
+    @api.depends_context('allowed_company_ids')
     def _compute_use_pagos_factura(self):
-        # Depende de company_id para que el onchange lo recalcule en la vista
+        # Evalúa contra la empresa seleccionada (pintada) en el selector, no la del registro
+        habilitado = bool(self.env.company.x_use_pagos_factura)
         for rec in self:
-            rec.x_use_pagos_factura = bool(rec.company_id and rec.company_id.x_use_pagos_factura)
+            rec.x_use_pagos_factura = habilitado
     x_efectivo = fields.Float(string="Importe Efectivo")
     x_imp_mp = fields.Float(string="Importe Mercado Pago")
     x_nro_mp = fields.Char(string="Nro. Transacción M.P.")
