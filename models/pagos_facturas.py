@@ -98,10 +98,13 @@ class AccountMove(models.Model):
             else:
                 rec.x_neto = rec.amount_total - rec.x_efectivo - rec.x_imp_mp - rec.x_imp_tarj - rec.x_saldo_favor
 
-    @api.depends('partner_id', 'state', 'amount_total')        
+    @api.depends('partner_id', 'state', 'amount_total', 'operating_unit_id')
     def _compute_saldo_favor(self):
         """
         Calcula el saldo a favor (créditos no aplicados) del cliente.
+        Acotado a la misma unidad operativa (sucursal): con partners compartidos
+        entre sucursales (ej. Consumidor Final Anónimo), sumar sin este filtro
+        mezcla el saldo de una sucursal con el de otra.
         """
         for rec in self:
             if not rec.partner_id or rec.partner_id.x_no_saldo_favor:
@@ -111,6 +114,7 @@ class AccountMove(models.Model):
             # 1. Definir Dominio (Tu lógica optimizada)
             domain = [
                 ('partner_id', '=', rec.partner_id.id),
+                ('operating_unit_id', '=', rec.operating_unit_id.id),
                 ('parent_state', '=', 'posted'),
                 ('reconciled', '=', False),
                 ('account_id.account_type', '=', 'asset_receivable'), # Solo cuentas a cobrar
